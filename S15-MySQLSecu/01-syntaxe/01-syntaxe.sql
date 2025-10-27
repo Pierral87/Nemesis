@@ -358,5 +358,196 @@ SELECT MAX(salaire) FROM employes;
 |         5000 |
 +--------------+
 
+-- EXERCICE : Affichez le salaire minimum ainsi que le prénom de l'employé ayant ce salaire
+    -- Pensez bien à vérifier vos résultats 
+SELECT prenom, MIN(salaire) FROM employes;
++-------------+--------------+
+| prenom      | MIN(salaire) |
++-------------+--------------+
+| Jean-pierre |         1390 |
++-------------+--------------+
+-- Erreur ci dessus, cela nous sort Jean-Pierre, le prénom de la BDD, à côté de la fonction d'agregation qui ne peut sortir qu'une seule ligne de résultat ! Incohérence de résultat ! 
+
+-- 1ère possibilité requête imbriquée
+                                                                -- 1390
+SELECT prenom, salaire FROM employes WHERE salaire = (SELECT MIN(salaire) FROM employes);
+
+-- 2 ème possibilité grâce à un ORDER BY et LIMIT
+SELECT prenom, salaire FROM employes ORDER BY salaire ASC LIMIT 1;
++--------+---------+
+| prenom | salaire |
++--------+---------+
+| Julien |    1390 |
++--------+---------+
+
+-- IN & NOT IN pour tester plusieurs valeurs 
+-- Affichage des employés des services commercial et comptabilité
+SELECT * FROM employes WHERE service = "commercial" OR service = "comptabilite";
+SELECT * FROM employes WHERE service IN ("commercial", "comptabilite");
++-------------+-----------+---------+------+--------------+---------------+---------+
+| id_employes | prenom    | nom     | sexe | service      | date_embauche | salaire |
++-------------+-----------+---------+------+--------------+---------------+---------+
+|         388 | Clement   | Gallet  | m    | commercial   | 2010-12-15    |    2300 |
+|         415 | Thomas    | Winter  | m    | commercial   | 2011-05-03    |    3550 |
+|         509 | Fabrice   | Grand   | m    | comptabilite | 2011-12-30    |    2900 |
+|         547 | Melanie   | Collier | f    | commercial   | 2012-01-08    |    3100 |
+|         627 | Guillaume | Miller  | m    | commercial   | 2012-07-02    |    1900 |
+|         655 | Celine    | Perrin  | f    | commercial   | 2012-09-10    |    2700 |
+|         933 | Emilie    | Sennard | f    | commercial   | 2017-01-11    |    1800 |
++-------------+-----------+---------+------+--------------+---------------+---------+
+SELECT * FROM employes WHERE service NOT IN ("commercial", "comptabilite");
+
+-- Plusieurs conditions : AND 
+-- On veut un employé du service commercial ayant un salaire inférieur ou égal à 2000
+SELECT * FROM employes WHERE service = "commercial" AND salaire <= 2000;
+
+-- MySQL accepte tout à fait les sauts de lignes dans les requêtes, on souhaitera parfois sauter des lignes sur les requêtes longues pour gagner en visibilité 
+SELECT * 
+FROM employes 
+WHERE service = "commercial" 
+AND salaire <= 2000
+AND sexe = "m"
+ORDER by nom;
+
+-- L'un ou l'autre d'un ensemble de conditions : OR 
+-- EXERCICE : requête pour trouver : employés du service production ayant un salaire égal à 1900 ou 2300
+    -- Vérifier vos résultats 
+SELECT * FROM employes WHERE service = "production" AND salaire = 1900 OR salaire = 2300;
++-------------+---------+--------+------+------------+---------------+---------+
+| id_employes | prenom  | nom    | sexe | service    | date_embauche | salaire |
++-------------+---------+--------+------+------------+---------------+---------+
+|         388 | Clement | Gallet | m    | commercial | 2010-12-15    |    2300 |
+|         417 | Chloe   | Dubar  | f    | production | 2011-09-05    |    1900 |
++-------------+---------+--------+------+------------+---------------+---------+
+SELECT * FROM employes WHERE service = "production" AND (salaire = 1900 OR salaire = 2300);
+SELECT * FROM employes WHERE service = "production" AND salaire IN (1900,2300);
++-------------+--------+-------+------+------------+---------------+---------+
+| id_employes | prenom | nom   | sexe | service    | date_embauche | salaire |
++-------------+--------+-------+------+------------+---------------+---------+
+|         417 | Chloe  | Dubar | f    | production | 2011-09-05    |    1900 |
++-------------+--------+-------+------+------------+---------------+---------+
+
+-- GROUP BY pour regrouper selon un ou plusieurs champs (généralement utilisé avec des fonctions d'agrégation)
+-- Nombre d'employés par service 
+SELECT COUNT(*), service FROM employes; -- Résultat incorrect du fait du COUNT() (fonction d'agrégation), le résultat ne renvoie qu'une seule ligne 
+-- Avec GROUP BY il va être possible de demander de nous renvoyer le COUNT() par service 
+
+SELECT COUNT(*) AS nombre_employes, service FROM employes GROUP BY service;
++-----------------+---------------+
+| nombre_employes | service       |
++-----------------+---------------+
+|               2 | direction     |
+|               6 | commercial    |
+|               2 | production    |
+|               3 | secretariat   |
+|               1 | comptabilite  |
+|               3 | informatique  |
+|               1 | communication |
+|               1 | juridique     |
+|               1 | assistant     |
++-----------------+---------------+
+-- Le GROUP BY m'a permis d'appliquer la fonction d'agrégation COUNT() à divers bloc séparément les uns des autres 
+
+
+-- Ci dessous une requête classique SELECT * FROM employes ORDER BY service;
+-- On imagine le fonctionnement de GROUP BY par un éclatement du résultat qui permet au système d'appliquer la fonction d'agreg pour chaque groupe différent, ici on regroupe par "service", donc il va compter chaque employé par chaque service distinct 
++-------------+-------------+----------+------+---------------+---------------+---------+
+| id_employes | prenom      | nom      | sexe | service       | date_embauche | salaire |
++-------------+-------------+----------+------+---------------+---------------+---------+
+
+|         990 | Stephanie   | Lafaye   | f    | assistant     | 2017-03-01    |    1775 |
+
+|         388 | Clement     | Gallet   | m    | commercial    | 2010-12-15    |    2300 |
+|         415 | Thomas      | Winter   | m    | commercial    | 2011-05-03    |    3550 |
+|         547 | Melanie     | Collier  | f    | commercial    | 2012-01-08    |    3100 |
+|         627 | Guillaume   | Miller   | m    | commercial    | 2012-07-02    |    1900 |
+|         655 | Celine      | Perrin   | f    | commercial    | 2012-09-10    |    2700 |
+|         933 | Emilie      | Sennard  | f    | commercial    | 2017-01-11    |    1800 |
+
+|         780 | Amandine    | Thoyer   | f    | communication | 2014-01-23    |    2100 |
+
+|         509 | Fabrice     | Grand    | m    | comptabilite  | 2011-12-30    |    2900 |
+
+|         350 | Jean-pierre | Laborde  | m    | direction     | 2010-12-09    |    5000 |
+|         592 | Laura       | Blanchet | f    | direction     | 2012-05-09    |    4500 |
+
+|         701 | Mathieu     | Vignal   | m    | informatique  | 2013-04-03    |    2500 |
+|         802 | Damien      | Durand   | m    | informatique  | 2014-07-05    |    2250 |
+|         854 | Daniel      | Chevel   | m    | informatique  | 2015-09-28    |    3100 |
+
+|         876 | Nathalie    | Martin   | f    | juridique     | 2016-01-12    |    3550 |
+
+|         417 | Chloe       | Dubar    | f    | production    | 2011-09-05    |    1900 |
+|         900 | Benoit      | Lagarde  | m    | production    | 2016-06-03    |    2550 |
+
+|         491 | Elodie      | Fellier  | f    | secretariat   | 2011-11-22    |    1600 |
+|         699 | Julien      | Cottet   | m    | secretariat   | 2013-01-05    |    1390 |
+|         739 | Thierry     | Desprez  | m    | secretariat   | 2013-07-17    |    1500 |
++-------------+-------------+----------+------+---------------+---------------+---------+
+
+
+-- Il est possible de mettre une condition sur un GROUP BY    :  HAVING 
+-- Nombre d'employés par service, pour les services ayant plus de 2 employés 
+SELECT COUNT(*), service FROM employes GROUP BY service HAVING COUNT(*) > 2;
+
+
+--------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------
+------------ REQUETES D'INSERTION (Action : enregistrement) --------------------------
+--------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------
+
+-- Requête d'insertion : INSERT INTO table (champ1, champ2, champ3, etc) VALUES (valeur1, valeur2, valeur3, etc);
+
+-- En citant tous les champs : 
+INSERT INTO employes (id_employes, prenom, nom, salaire, sexe, service, date_embauche) VALUES (NULL, "Pierral", "Lacaze", 12000, "m", "Web", CURDATE());
+-- Vérification
+SELECT * FROM employes;
+
+-- Je peux ne pas citer du tout l'id, de toute façon il est auto incrémenté 
+INSERT INTO employes (prenom, nom, salaire, sexe, service, date_embauche) VALUES ("Pierral", "Lacaze", 20000, "m", "Info", CURDATE());
+
+-- Dernière syntaxe, sans citer les champs, par contre attention, il faudra donner les VALUES dans le MEME ORDRE QUE LA STRUCTURE DE LA TABLE
+INSERT INTO employes VALUES (NULL, "Pierro", "Lac", "m", "Web", CURDATE(), 1800);
+
+
+--------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------
+------------ REQUETES DE MODIFICATION (Action : modification) ------------------------
+--------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------
+
+-- On modifie le salaire d'un employé
+UPDATE employes SET salaire = 2100 WHERE id_employes = 991;
+-- Plusieurs champs à modifier
+UPDATE employes SET salaire = 2000, service = "informatique" WHERE id_employes = 992;
+
+-- REPLACE
+-- REPLACE se comporte à la fois comme un INSERT et comme un UPDATE
+
+-- Premier lancement de REPLACE pour faire un insert 
+REPLACE INTO employes VALUES (994, "Polo", "Lolo", "m", "resto", NOW(), 2000);
+
+-- Deuxième lancement de REPLACE pour modifier Polo
+REPLACE INTO employes VALUES (994, "Polo", "Lolo", "m", "resto", NOW(), 1000);
+
+-- ATTENTION on utilise JAMAIS REPLACE
+    -- Pourquoi ? Car dans le contexte d'une "modification" REPLACE va d'abord supprimer la ligne pour ensuite la réinsérer
+        -- Cela nous poserait d'énorme problème si l'enregistrement supprimé est lié à une autre table via une relation avec une contrainte en mode CASCADE (réaction en chaine), ce qui induirait la suppression de tous les éléments enfants qui lui sont rattachés (Par exemple, un utilisateur passe des commandes, les commandes sont les "enfants" de cet utilisateur)
+
+
+--------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------
+------------ REQUETES DE SUPPRESSION (Action : supprimer) ----------------------------
+--------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------
+
+DELETE FROM employes; -- Cette requête supprime toutes les données de la table (un peu comme un TRUNCATE mais DELETE est une opération type CRUD)
+
+-- Suppression d'une ligne en rapport avec une condition 
+DELETE FROM employes WHERE id_employes = 991;
+
+-- Suppression des employés avec un id supérieur à 990 
+DELETE FROM employes WHERE id_employes > 990;
 
 
