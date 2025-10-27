@@ -84,3 +84,279 @@ INSERT INTO employes (id_employes, prenom, nom, sexe, service, date_embauche, sa
 (900, 'Benoit', 'Lagarde', 'm', 'production', '2016-06-03', 2550),
 (933, 'Emilie', 'Sennard', 'f', 'commercial', '2017-01-11', 1800),
 (990, 'Stephanie', 'Lafaye', 'f', 'assistant', '2017-03-01', 1775);
+
+--------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------
+------------ REQUETES DE SELECTION (On questionne la BDD) ----------------------------
+--------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------
+
+-- Affichage complet des données d'une table
+SELECT * FROM employes;
+
+-- Affichage que de quelques champs de la table
+SELECT nom, prenom FROM employes;
+
+-- Affichez les services : 
+SELECT service FROM employes;
+-- La requête ci dessus me renvoie 20 services, en fait, le service de chaque ligne d'enregistrement
+
+-- Pour éviter les doublons et avoir "la liste" des services
+SELECT DISTINCT service FROM employes;
++---------------+
+| service       |
++---------------+
+| direction     |
+| commercial    |
+| production    |
+| secretariat   |
+| comptabilite  |
+| informatique  |
+| communication |
+| juridique     |
+| assistant     |
++---------------+
+
+-- CONDITION WHERE
+-- Affichage de l'employé id 350
+SELECT * FROM employes WHERE id_employes = 350;
++-------------+-------------+---------+------+-----------+---------------+---------+
+| id_employes | prenom      | nom     | sexe | service   | date_embauche | salaire |
++-------------+-------------+---------+------+-----------+---------------+---------+
+|         350 | Jean-pierre | Laborde | m    | direction | 2010-12-09    |    5000 |
++-------------+-------------+---------+------+-----------+---------------+---------+
+
+-- Affichage des employés du service informatique
+SELECT * FROM employes WHERE service = "informatique";
++-------------+---------+--------+------+--------------+---------------+---------+
+| id_employes | prenom  | nom    | sexe | service      | date_embauche | salaire |
++-------------+---------+--------+------+--------------+---------------+---------+
+|         701 | Mathieu | Vignal | m    | informatique | 2013-04-03    |    2500 |
+|         802 | Damien  | Durand | m    | informatique | 2014-07-05    |    2250 |
+|         854 | Daniel  | Chevel | m    | informatique | 2015-09-28    |    3100 |
++-------------+---------+--------+------+--------------+---------------+---------+
+
+-- BETWEEN 
+-- Affichage des employés ayant été embauchés entre 2015 et aujourd'hui
+SELECT * FROM employes WHERE date_embauche BETWEEN "2015-01-01" AND "2025-10-27";
++-------------+-----------+---------+------+--------------+---------------+---------+
+| id_employes | prenom    | nom     | sexe | service      | date_embauche | salaire |
++-------------+-----------+---------+------+--------------+---------------+---------+
+|         854 | Daniel    | Chevel  | m    | informatique | 2015-09-28    |    3100 |
+|         876 | Nathalie  | Martin  | f    | juridique    | 2016-01-12    |    3550 |
+|         900 | Benoit    | Lagarde | m    | production   | 2016-06-03    |    2550 |
+|         933 | Emilie    | Sennard | f    | commercial   | 2017-01-11    |    1800 |
+|         990 | Stephanie | Lafaye  | f    | assistant    | 2017-03-01    |    1775 |
++-------------+-----------+---------+------+--------------+---------------+---------+
+SELECT * FROM employes WHERE date_embauche BETWEEN "2015-01-01" AND NOW();
+SELECT * FROM employes WHERE date_embauche BETWEEN "2015-01-01" AND CURDATE();
+
+-- LIKE la valeur approchante
+-- LIKE nous permet de rechercher une information qui ne serait pas saisie en entier, une information pas stricte
+-- Les prénoms qui commencent par "s"
+SELECT prenom FROM employes WHERE prenom LIKE "s%";
++-----------+
+| prenom    |
++-----------+
+| Stephanie |
++-----------+
+
+-- Affichage des prénoms terminant par les lettres "ie"
+SELECT prenom FROM employes WHERE prenom LIKE "%ie";
++-----------+
+| prenom    |
++-----------+
+| Elodie    |
+| Melanie   |
+| Nathalie  |
+| Emilie    |
+| Stephanie |
++-----------+
+
+SELECT prenom FROM employes WHERE prenom LIKE "%ie%";
++-------------+
+| prenom      |
++-------------+
+| Jean-pierre |
+| Elodie      |
+| Melanie     |
+| Julien      |
+| Mathieu     |
+| Thierry     |
+| Damien      |
+| Daniel      |
+| Nathalie    |
+| Emilie      |
+| Stephanie   |
++-------------+
+
+-- EXCLUSION 
+-- Tous les employés sauf ceux d'un service particulier, par exemple sauf le service commercial 
+SELECT * FROM employes WHERE service != "commercial"; -- != différent de 
++-------------+-------------+----------+------+---------------+---------------+---------+
+| id_employes | prenom      | nom      | sexe | service       | date_embauche | salaire |
++-------------+-------------+----------+------+---------------+---------------+---------+
+|         350 | Jean-pierre | Laborde  | m    | direction     | 2010-12-09    |    5000 |
+|         417 | Chloe       | Dubar    | f    | production    | 2011-09-05    |    1900 |
+|         491 | Elodie      | Fellier  | f    | secretariat   | 2011-11-22    |    1600 |
+|         509 | Fabrice     | Grand    | m    | comptabilite  | 2011-12-30    |    2900 |
+|         592 | Laura       | Blanchet | f    | direction     | 2012-05-09    |    4500 |
+|         699 | Julien      | Cottet   | m    | secretariat   | 2013-01-05    |    1390 |
+|         701 | Mathieu     | Vignal   | m    | informatique  | 2013-04-03    |    2500 |
+|         739 | Thierry     | Desprez  | m    | secretariat   | 2013-07-17    |    1500 |
+|         780 | Amandine    | Thoyer   | f    | communication | 2014-01-23    |    2100 |
+|         802 | Damien      | Durand   | m    | informatique  | 2014-07-05    |    2250 |
+|         854 | Daniel      | Chevel   | m    | informatique  | 2015-09-28    |    3100 |
+|         876 | Nathalie    | Martin   | f    | juridique     | 2016-01-12    |    3550 |
+|         900 | Benoit      | Lagarde  | m    | production    | 2016-06-03    |    2550 |
+|         990 | Stephanie   | Lafaye   | f    | assistant     | 2017-03-01    |    1775 |
++-------------+-------------+----------+------+---------------+---------------+---------+
+
+-- Les opérateurs de comparaison : 
+
+    -- =  est égal à 
+    -- != est différent de 
+    -- > strictement supérieur 
+    -- >= supérieur ou égal
+    -- < strictement inférieur
+    -- <= inférieur ou égal 
+
+-- Les employés ayant un salaire supérieur à 3000 
+SELECT nom, prenom, service, salaire FROM employes WHERE salaire > 3000;
++----------+-------------+--------------+---------+
+| nom      | prenom      | service      | salaire |
++----------+-------------+--------------+---------+
+| Laborde  | Jean-pierre | direction    |    5000 |
+| Winter   | Thomas      | commercial   |    3550 |
+| Collier  | Melanie     | commercial   |    3100 |
+| Blanchet | Laura       | direction    |    4500 |
+| Chevel   | Daniel      | informatique |    3100 |
+| Martin   | Nathalie    | juridique    |    3550 |
++----------+-------------+--------------+---------+
+
+-- ORDER BY pour ordonner les résultats
+-- Affichage des employés dans l'ordre alphabétique 
+SELECT * FROM employes ORDER BY nom;
+SELECT * FROM employes ORDER BY nom ASC; -- ASC pour Ascendant, c'est l'ordre par défaut si non précisé, lorsqu'on parle de champs en string/varchar c'est l'ordre alphabétique
+
+-- Ordre inversé : DESC pour descendant
+SELECT * FROM employes ORDER BY nom DESC;
+
+-- Il est possible également d'ordonner par plusieurs champs. Il suffit de les citer dans l'ordre de priorité après le ORDER BY 
+
+SELECT service, nom, prenom FROM employes ORDER BY service;
+SELECT service, nom, prenom FROM employes ORDER BY service, nom;
+
+-- LIMIT pour limiter le nombre de résultat
+-- Affichage des employés 3 par 3 
+SELECT * FROM employes LIMIT 0, 3; -- LIMIT position/offset, nombre_lignes
++-------------+-------------+---------+------+------------+---------------+---------+
+| id_employes | prenom      | nom     | sexe | service    | date_embauche | salaire |
++-------------+-------------+---------+------+------------+---------------+---------+
+|         350 | Jean-pierre | Laborde | m    | direction  | 2010-12-09    |    5000 |
+|         388 | Clement     | Gallet  | m    | commercial | 2010-12-15    |    2300 |
+|         415 | Thomas      | Winter  | m    | commercial | 2011-05-03    |    3550 |
++-------------+-------------+---------+------+------------+---------------+---------+
+-- Pour les 3 suivants ?
+SELECT * FROM employes LIMIT 3, 3;
+-- Etc, etc
+SELECT * FROM employes LIMIT 6, 3;
+
+-- Si je donne un seul param à LIMIT, il le comprend comme étant le nombre de lignes attendues dans le résultat et partira toujours de la position 0 
+SELECT * FROM employes LIMIT 3; 
++-------------+-------------+---------+------+------------+---------------+---------+
+| id_employes | prenom      | nom     | sexe | service    | date_embauche | salaire |
++-------------+-------------+---------+------+------------+---------------+---------+
+|         350 | Jean-pierre | Laborde | m    | direction  | 2010-12-09    |    5000 |
+|         388 | Clement     | Gallet  | m    | commercial | 2010-12-15    |    2300 |
+|         415 | Thomas      | Winter  | m    | commercial | 2011-05-03    |    3550 |
++-------------+-------------+---------+------+------------+---------------+---------+
+-- La syntaxe ci dessous est celle de PostgreSQL, elle fonctionne malgré tout en MySQL ! Ce qui me permet plus tard de si je souhaite migrer de MySQL vers Postgre, que je puisse le faire sans rechanger toutes mes instructions LIMIT 
+SELECT * FROM employes LIMIT 3 OFFSET 0;
+
+-- Affichage des employés avec leur salaire annuel 
+SELECT nom, prenom, service, salaire * 12 FROM employes;
+-- La même requête mais en donnant un alias à la colonne du calcul
+SELECT nom, prenom, service, salaire * 12 AS salaire_annuel FROM employes;
+-- Attention, on pense toujours que l'on récupèrera le résultat de notre requête dans notre langage back, souvent en format array ou objet, donc, il faudra s'assurer de mettre des alias "compatible" pour éviter les caractères spéciaux dans les noms des props d'objet ou de key des 
++----------+-------------+---------------+----------------+
+| nom      | prenom      | service       | salaire_annuel |
++----------+-------------+---------------+----------------+
+| Laborde  | Jean-pierre | direction     |          60000 |
+| Gallet   | Clement     | commercial    |          27600 |
+| Winter   | Thomas      | commercial    |          42600 |
+| Dubar    | Chloe       | production    |          22800 |
+| Fellier  | Elodie      | secretariat   |          19200 |
+| Grand    | Fabrice     | comptabilite  |          34800 |
+| Collier  | Melanie     | commercial    |          37200 |
+| Blanchet | Laura       | direction     |          54000 |
+| Miller   | Guillaume   | commercial    |          22800 |
+| Perrin   | Celine      | commercial    |          32400 |
+| Cottet   | Julien      | secretariat   |          16680 |
+| Vignal   | Mathieu     | informatique  |          30000 |
+| Desprez  | Thierry     | secretariat   |          18000 |
+| Thoyer   | Amandine    | communication |          25200 |
+| Durand   | Damien      | informatique  |          27000 |
+| Chevel   | Daniel      | informatique  |          37200 |
+| Martin   | Nathalie    | juridique     |          42600 |
+| Lagarde  | Benoit      | production    |          30600 |
+| Sennard  | Emilie      | commercial    |          21600 |
+| Lafaye   | Stephanie   | assistant     |          21300 |
++----------+-------------+---------------+----------------+
+
+--------------------- FONCTIONS D'AGREGATION -------------------------------
+
+-- SUM() pour avoir la somme 
+-- La masse salariale annuelle de l'entreprise
+SELECT SUM(salaire * 12) AS masse_salariale FROM employes;
++-----------------+
+| masse_salariale |
++-----------------+
+|          623580 |
++-----------------+
+
+-- AVG() la moyenne
+-- Affichage du salaire moyen de l'entreprise
+SELECT AVG(salaire) AS salaire_moyen FROM employes;
++---------------+
+| salaire_moyen |
++---------------+
+|       2598.25 |
++---------------+
+
+-- ROUND() pour arrondir
+-- ROUND(valeur) => arrondi à l'entier
+-- ROUND(valeur, 1) => arrondi à 1 décimale (je peux choisir le nombre de décimales souhaitées)
+SELECT ROUND(AVG(salaire)) AS salaire_moyen FROM employes;
+
+-- COUNT() permet de compter le nombre de ligne d'une requête
+-- Le nombre d'employés dans l'entreprise : 
+SELECT COUNT(*) AS nombre_employes FROM employes; 
+-- Attention ici pour le param fournit dans les parenthèses du COUNT()
+-- Si je fourni * ou la primary key de la table, je m'assure de compter toutes les lignes de la selection 
+-- Par contre, si je fourni un autre champ, et que ce champ est peut être NULL sur certaines lignes, alors les lignes NULL ne seront pas comptées ! 
+-- On préfèrera toujours mettre * et régler avec des conditions WHERE pour isoler le compte que de certaines lignes
++-----------------+
+| nombre_employes |
++-----------------+
+|              20 |
++-----------------+
+
+-- MIN() & MAX()
+-- salaire minimum
+SELECT MIN(salaire) FROM employes;
++--------------+
+| MIN(salaire) |
++--------------+
+|         1390 |
++--------------+
+-- salaire maximum
+SELECT MAX(salaire) FROM employes;
++--------------+
+| MAX(salaire) |
++--------------+
+|         5000 |
++--------------+
+
+
+
