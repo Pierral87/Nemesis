@@ -550,11 +550,17 @@ DELETE FROM employes WHERE id_employes = 991;
 -- Suppression des employés avec un id supérieur à 990 
 DELETE FROM employes WHERE id_employes > 990;
 
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+-- EXERCICES : -----------------------------------------------------------
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
 
 -- 1 -- Afficher la profession de l'employé 547.
 -- 2 -- Afficher la date d'embauche d'Amandine.	
 -- 3 -- Afficher le nom de famille de Guillaume	
 -- 4 -- Afficher le nombre de personne ayant un n° id_employes commençant par le chiffre 5.	
+-- 5 -- Afficher le nombre de commerciaux.
 -- 6 -- Afficher le salaire moyen des informaticiens 
 -- 7 -- Afficher les 5 premiers employés après avoir classé leur nom de famille par ordre alphabétique. 
 -- 8 -- Afficher le coût des commerciaux sur 1 année.	
