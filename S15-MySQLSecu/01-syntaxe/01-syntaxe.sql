@@ -551,3 +551,23 @@ DELETE FROM employes WHERE id_employes = 991;
 DELETE FROM employes WHERE id_employes > 990;
 
 
+-- 1 -- Afficher la profession de l'employé 547.
+-- 2 -- Afficher la date d'embauche d'Amandine.	
+-- 3 -- Afficher le nom de famille de Guillaume	
+-- 4 -- Afficher le nombre de personne ayant un n° id_employes commençant par le chiffre 5.	
+-- 6 -- Afficher le salaire moyen des informaticiens 
+-- 7 -- Afficher les 5 premiers employés après avoir classé leur nom de famille par ordre alphabétique. 
+-- 8 -- Afficher le coût des commerciaux sur 1 année.	
+-- 9 -- Afficher le salaire moyen par service. 
+-- 10 -- Afficher le nombre de recrutement sur l'année 2010
+-- 11 -- Afficher le salaire moyen appliqué lors des recrutements sur la période allant de 2015 a 2017
+-- 12 -- Afficher le nombre de service différent 
+-- 13 -- Afficher tous les employés sauf ceux du service production et secrétariat
+-- 14 -- Afficher conjointement le nombre d'homme et de femme dans l'entreprise
+-- 15 -- Afficher les commerciaux ayant été recrutés avant 2012 de sexe masculin et gagnant un salaire supérieur a 2500 €
+-- 16 -- Qui a été embauché en dernier 
+-- 17 -- Afficher les informations sur l'employé du service commercial gagnant le salaire le plus élevé
+-- 18 -- Afficher le prénom du comptable gagnant le meilleur salaire 
+-- 19 -- Afficher le prénom de l'informaticien ayant été recruté en premier 
+-- 20 -- Augmenter chaque employé de 100 €
+-- 21 -- Supprimer les employés du service secrétariat
