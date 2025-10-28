@@ -190,7 +190,7 @@ AND abonne.id_abonne = emprunt.id_abonne; -- La création de la jointure (on ind
 -- On peut indiquer des alias de table pour raccourcir l'écriture des préfixes 
 SELECT a.prenom, e.date_sortie, e.date_rendu   
 FROM abonne a, emprunt e                     
-WHERE prenom = "Guillaume"                
+WHERE a.prenom = "Guillaume"                
 AND a.id_abonne = e.id_abonne; 
 
 -- Autre syntaxe pour les jointures
@@ -200,21 +200,143 @@ AND a.id_abonne = e.id_abonne;
 SELECT a.prenom, e.date_sortie, e.date_rendu 
 FROM emprunt e 
 INNER JOIN abonne a USING (id_abonne) -- Je peux utiliser USING uniquement si le champ lié (PK et FK) possède le même nom dans les deux tables 
-WHERE prenom = "Guillaume";
+WHERE a.prenom = "Guillaume";
 
 SELECT a.prenom, e.date_sortie, e.date_rendu 
 FROM emprunt e 
 JOIN abonne a USING (id_abonne)
-WHERE prenom = "Guillaume";
+WHERE a.prenom = "Guillaume";
 
 SELECT a.prenom, e.date_sortie, e.date_rendu 
 FROM emprunt e 
 JOIN abonne a ON a.id_abonne = e.id_abonne -- Sinon, je peux utiliser la syntaxe ON pour lier un champ PK à un autre champ FK nommé différemment 
-WHERE prenom = "Guillaume";
+WHERE a.prenom = "Guillaume";
 
 -- EXERCICE 1 : Nous aimerions connaitre les dates de sortie et les dates de rendu pour les livres écrit par Alphonse Daudet
+SELECT l.titre, e.date_sortie, e.date_rendu 
+FROM emprunt e 
+JOIN livre l ON e.id_livre = l.id_livre 
+WHERE l.auteur = "Alphonse Daudet";
++----------------+-------------+------------+
+| titre          | date_sortie | date_rendu |
++----------------+-------------+------------+
+| Le Petit chose | 2016-12-12  | 2016-12-22 |
++----------------+-------------+------------+
 -- EXERCICE 2 : Qui a emprunté le livre "une vie" sur l'année 2016
+SELECT a.prenom, l.titre, e.date_sortie 
+FROM emprunt e 
+JOIN livre l ON e.id_livre = l.id_livre 
+JOIN abonne a ON e.id_abonne = a.id_abonne 
+WHERE l.titre = "Une vie" 
+AND YEAR(e.date_sortie) = 2016;
++-----------+---------+-------------+
+| prenom    | titre   | date_sortie |
++-----------+---------+-------------+
+| Guillaume | Une vie | 2016-12-07  |
+| Chloe     | Une vie | 2016-12-11  |
++-----------+---------+-------------+
 -- EXERCICE 3 : Nous aimerions connaitre le nombre de livre emprunté par chaque abonné 
+SELECT a.prenom, COUNT(*) AS livre_empruntes 
+FROM emprunt e 
+JOIN abonne a ON e.id_abonne = a.id_abonne 
+GROUP BY a.id_abonne;
++-----------+-----------------+
+| prenom    | livre_empruntes |
++-----------+-----------------+
+| Guillaume |               2 |
+| Benoit    |               3 |
+| Chloe     |               3 |
+| Laura     |               1 |
++-----------+-----------------+
 -- EXERCICE 4 : Nous aimerions connaitre le nombre de livre emprunté à rendre par chaque abonné 
+SELECT a.prenom, COUNT(*) as livres_a_rendre
+FROM abonne a 
+JOIN emprunt e USING (id_abonne)
+WHERE e.date_rendu IS NULL 
+GROUP BY a.id_abonne;
++--------+-----------------+
+| prenom | livres_a_rendre |
++--------+-----------------+
+| Chloe  |               2 |
+| Benoit |               1 |
++--------+-----------------+
 -- EXERCICE 5 : Qui (prenom) a emprunté Quoi (titre) et Quand (date_sortie) ?
+SELECT a.prenom AS qui, l.titre AS quoi, e.date_sortie as quand 
+FROM emprunt e 
+JOIN livre l ON l.id_livre = e.id_livre
+JOIN abonne a ON a.id_abonne = e.id_abonne
+ORDER BY qui;
++-----------+-------------------------+------------+
+| qui       | quoi                    | quand      |
++-----------+-------------------------+------------+
+| Benoit    | Bel-Ami                 | 2016-12-07 |
+| Benoit    | Les Trois Mousquetaires | 2017-01-02 |
+| Benoit    | Une vie                 | 2017-02-20 |
+| Chloe     | Une vie                 | 2016-12-11 |
+| Chloe     | Les Trois Mousquetaires | 2017-02-15 |
+| Chloe     | La Reine Margot         | 2025-10-28 |
+| Guillaume | Une vie                 | 2016-12-07 |
+| Guillaume | La Reine Margot         | 2016-12-15 |
+| Laura     | Le Petit chose          | 2016-12-12 |
++-----------+-------------------------+------------+
 
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+------- JOINTURE EXTERNE --------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+
+-- Enregistrez-vous dans la table abonné 
+INSERT INTO abonne (prenom) VALUES ("Pierre-Alex");
+SELECT * FROM abonne;
++-----------+-------------+
+| id_abonne | prenom      |
++-----------+-------------+
+|         1 | Guillaume   |
+|         2 | Benoit      |
+|         3 | Chloe       |
+|         4 | Laura       |
+|         5 | Pierre-Alex |
++-----------+-------------+
+
+-- Affichez tous les prénoms des abonnés SANS EXCEPTION ainsi que les id_livre qu'ils ont emprnuté si c'est le cas 
+-- Avec les requêtes que l'on connait jusqu'à présent, impossible de récupérer Pierre-Alex dans le résultat ! Pourquoi ? car il n'a pas de correspondance dans la table emprunt, et nous sommes en train de faire des jointures INTERNE
+SELECT a.prenom, e.id_livre 
+FROM abonne a 
+JOIN emprunt e USING (id_abonne)
+ORDER BY a.prenom;
+
+
+-- Pour récupérer l'intégralité d'une table et obtenir toutes les informations de cette table en y rajoutant les correspondances s'il y en a, nous allons procéder à une jointure EXTERNE
+-- ATTENTION ici l'ordre d'appel de nos tables est très important ! 
+SELECT a.prenom, e.id_livre 
+FROM abonne a 
+LEFT JOIN emprunt e USING (id_abonne) -- Ici avec un LEFT JOIN c'est la table la plus à gauche de la requête qui sera considérée "principale" de laquelle on récupèrera la totalité des données même sans correspondance dans la table jointe
+ORDER BY a.prenom;
+
+SELECT a.prenom, e.id_livre 
+FROM emprunt e 
+RIGHT JOIN abonne a USING (id_abonne)  -- Ici avec un RIGHT JOIN c'est la table la plus à droite de la requête qui sera considérée "principale" de laquelle on récupèrera la totalité des données même sans correspondance dans la table jointe
+ORDER BY a.prenom;
+
+-- Ici grâce à la jointure externe je récupère bien Pierre-Alex bien qu'il n'ai pas d'emprunts !
+-- A côté de ça, je récupère quand même tous les autres abonnés avec les détails de leurs emprunts 
++-------------+----------+
+| prenom      | id_livre |
++-------------+----------+
+| Benoit      |      100 |
+| Benoit      |      105 |
+| Benoit      |      101 |
+| Chloe       |      104 |
+| Chloe       |      105 |
+| Chloe       |      100 |
+| Guillaume   |      104 |
+| Guillaume   |      100 |
+| Laura       |      103 |
+| Pierre-Alex |     NULL |
++-------------+----------+
+
+-- EXERCICE 1 : Affichez tous les livres sans exception puis les id_abonne ayant emprunté ces livres si c'est le cas
+-- EXERCICE 2 : Affichez tous les prénoms des abonnés et s'ils ont fait des emprunts, affichez les id_livre, auteur et titre
+-- EXERCICE 3 : Affichez tous les prénoms des abonnés et s'ils ont fait des emprunts, affichez les id_livre, auteur et titre ainsi que les livres non empruntés :)
