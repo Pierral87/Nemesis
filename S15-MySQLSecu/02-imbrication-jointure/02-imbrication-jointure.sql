@@ -189,7 +189,7 @@ AND abonne.id_abonne = emprunt.id_abonne; -- La création de la jointure (on ind
 
 -- On peut indiquer des alias de table pour raccourcir l'écriture des préfixes 
 SELECT a.prenom, e.date_sortie, e.date_rendu   
-FROM abonne a, emprunt e                     
+FROM abonne a, emprunt e            
 WHERE a.prenom = "Guillaume"                
 AND a.id_abonne = e.id_abonne; 
 
@@ -306,18 +306,29 @@ SELECT a.prenom, e.id_livre
 FROM abonne a 
 JOIN emprunt e USING (id_abonne)
 ORDER BY a.prenom;
++-----------+----------+
+| prenom    | id_livre |
++-----------+----------+
+| Benoit    |      101 |
+| Benoit    |      105 |
+| Benoit    |      100 |
+| Chloe     |      100 |
+| Chloe     |      105 |
+| Chloe     |      104 |
+| Guillaume |      100 |
+| Guillaume |      104 |
+| Laura     |      103 |
++-----------+----------+
 
 
 -- Pour récupérer l'intégralité d'une table et obtenir toutes les informations de cette table en y rajoutant les correspondances s'il y en a, nous allons procéder à une jointure EXTERNE
 -- ATTENTION ici l'ordre d'appel de nos tables est très important ! 
 SELECT a.prenom, e.id_livre 
-FROM abonne a 
-LEFT JOIN emprunt e USING (id_abonne) -- Ici avec un LEFT JOIN c'est la table la plus à gauche de la requête qui sera considérée "principale" de laquelle on récupèrera la totalité des données même sans correspondance dans la table jointe
+FROM abonne a LEFT JOIN emprunt e USING (id_abonne) -- Ici avec un LEFT JOIN c'est la table la plus à gauche de la requête qui sera considérée "principale" de laquelle on récupèrera la totalité des données même sans correspondance dans la table jointe
 ORDER BY a.prenom;
 
 SELECT a.prenom, e.id_livre 
-FROM emprunt e 
-RIGHT JOIN abonne a USING (id_abonne)  -- Ici avec un RIGHT JOIN c'est la table la plus à droite de la requête qui sera considérée "principale" de laquelle on récupèrera la totalité des données même sans correspondance dans la table jointe
+FROM emprunt e RIGHT JOIN abonne a USING (id_abonne)  -- Ici avec un RIGHT JOIN c'est la table la plus à droite de la requête qui sera considérée "principale" de laquelle on récupèrera la totalité des données même sans correspondance dans la table jointe
 ORDER BY a.prenom;
 
 -- Ici grâce à la jointure externe je récupère bien Pierre-Alex bien qu'il n'ai pas d'emprunts !
@@ -338,5 +349,56 @@ ORDER BY a.prenom;
 +-------------+----------+
 
 -- EXERCICE 1 : Affichez tous les livres sans exception puis les id_abonne ayant emprunté ces livres si c'est le cas
+SELECT l.titre, e.id_abonne  
+FROM livre l 
+LEFT JOIN emprunt e USING (id_livre)
+ORDER BY l.titre;
++-------------------------+-----------+
+| titre                   | id_abonne |
++-------------------------+-----------+
+| Bel-Ami                 |         2 |
+| La Reine Margot         |         3 |
+| La Reine Margot         |         1 |
+| Le pere Goriot          |      NULL |
+| Le Petit chose          |         4 |
+| Les Trois Mousquetaires |         3 |
+| Les Trois Mousquetaires |         2 |
+| Une vie                 |         2 |
+| Une vie                 |         3 |
+| Une vie                 |         1 |
++-------------------------+-----------+
 -- EXERCICE 2 : Affichez tous les prénoms des abonnés et s'ils ont fait des emprunts, affichez les id_livre, auteur et titre
+SELECT a.prenom, l.id_livre, l.auteur, l.titre 
+FROM abonne a 
+LEFT JOIN emprunt e ON a.id_abonne = e.id_abonne 
+LEFT JOIN livre l ON e.id_livre = l.id_livre 
+ORDER BY a.prenom;
 -- EXERCICE 3 : Affichez tous les prénoms des abonnés et s'ils ont fait des emprunts, affichez les id_livre, auteur et titre ainsi que les livres non empruntés :)
+
+-- Faisable avec PostGre, malheureusement pas faisable en MySQL ! Nous n'avons pas le FULL JOIN
+SELECT a.prenom, l.id_livre, l.auteur, l.titre  
+FROM abonne a 
+FULL JOIN emprunt e ON a.id_abonne = e.id_abonne 
+FULL JOIN livre l ON e.id_livre = l.id_livre 
+ORDER BY a.prenom;
+
+
+-- Ici ne fonctionne pas, car je ne peux pas changer le sens de la jointure en cours de requête, il ne prendra en compte que la dernière instruction donc RIGHT JOIN
+SELECT a.prenom, l.id_livre, l.auteur, l.titre  
+FROM abonne a 
+LEFT JOIN emprunt e ON a.id_abonne = e.id_abonne 
+RIGHT JOIN livre l ON e.id_livre = l.id_livre 
+ORDER BY a.prenom;
+
+
+
+-- En MySQL pour "refaire" un FULL JOIN, on devra utiliser UNION qui permet de fusionner deux jeux de résultats en un seul
+SELECT a.prenom, l.id_livre, l.auteur, l.titre 
+FROM abonne a 
+LEFT JOIN emprunt e ON a.id_abonne = e.id_abonne
+LEFT JOIN livre l ON l.id_livre = e.id_livre
+UNION
+SELECT a.prenom, l.id_livre, l.auteur, l.titre 
+FROM abonne a 
+RIGHT JOIN emprunt e ON a.id_abonne = e.id_abonne
+RIGHT JOIN livre l ON l.id_livre = e.id_livre;
