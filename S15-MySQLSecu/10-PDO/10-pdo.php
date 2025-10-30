@@ -265,4 +265,43 @@ echo "Premier employé de la BDD : " . $employes[0]["prenom"] . "<hr>";
 // EXERCICE : Affichez les noms et prénoms des employés dans une liste ul li
     // A faire avec fetchAll()
 
+    echo "<ul>";
+        foreach($employes AS $employe) {
+            echo "<li>" . $employe["nom"] . " " . $employe["prenom"] . "</li>";
+        }
+    echo "</ul>";
+
+echo "<h2>06 - Requêtes préparées pour se protéger des injections SQL !</h2>";
+
+// prepare() permet de sécuriser les requêtes pour éviter les injections SQL
+// Si dans la requête on attend une information de l'utilisateur (saisie ou clic) alors OBLIGATION de faire prepare (dans le doute, on peut lancer TOUTES nos requêtes en prepare)
+
+$nom = "laborde"; // Information récupérée d'un form, un utilisateur cherche un employé par son nom 
+
+// Première étape : Préparation de la requête 
+
+// Première syntaxe possible avec des "?" remplaçant les valeurs attendues à réinsérer au niveau du execute
+// Cette syntaxe est rapide mais peu lisible
+$stmt = $pdo->prepare("SELECT * FROM employes WHERE nom = ?");
+$stmt->execute([$nom]); // On fourni ici dans les params du execute, un array qui contient les valeurs à coller à la place de nos "?"  ATTENTION ! DANS LE MEME ORDRE ! 
+$data = $stmt->fetch(PDO::FETCH_ASSOC);
+var_dump($data);
+
+
+// Sur des requêtes à nombreux param, cela amène des problèmes de lisibilité 
+
+// $stmt = $pdo->prepare("INSERT INTO employes (prenom, nom, sexe, service, salaire, date_embauche) VALUES (?, ?, ?, ?, ?, ?)");
+// $stmt->execute([$prenom, $nom, $sexe, $service, $salaire, $date_embauche]);
+
+$nom = "winter";
+// On préfèrera utiliser la façon des tokens/marqueurs 
+$stmt = $pdo->prepare("SELECT * FROM employes WHERE nom = :nom"); // On nomme les valeurs attendues par un mot précédé de ":"
+$stmt->bindparam(":nom", $nom, PDO::PARAM_STR); // On bind une valeur à chacun de ces marqueurs nominatifs un par un : un appel de bindparam, pour lier chaque marqueur ! 
+// Cela nous permet aussi d'appliquer le filtre de notre choix, en MySQL on peut toujours mettre PARAM_STR, cela filtre la totalité des infos en pur string et ne serons pas interprétés ! Le moteur MySQL est capable de refaire le tri dérrière à l'arrivée des données !  
+$stmt->execute();
+$data = $stmt->fetch(PDO::FETCH_ASSOC);
+var_dump($data);
+
+
+
 
