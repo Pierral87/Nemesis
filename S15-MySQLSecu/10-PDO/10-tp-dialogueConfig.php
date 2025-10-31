@@ -64,10 +64,27 @@ EXERCICE :
 */
 
 // - 02 - Créer une connexion à cette base avec PDO 
-$host = "mysql:host=localhost;dbname=dialogue";
-$login = "root";
-$password = "";
-$options = array(PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING);
+
+
+// Meme TP mais en récupérant les informations de connexion à la BDD dans un fichier extérieur à celui (pour raison de sécurité)
+// Ici avec json, ça pourait être un php, un xml aussi
+try {
+    $config = json_decode(file_get_contents("config.json"), true);
+    var_dump($config);
+    $dbHost = $config["db_host"];
+    $dbName = $config["db_name"];
+    $host = "mysql:host=$dbHost;dbname=$dbName";
+    $login = $config["db_user"];
+    $password = $config["db_password"];
+    $options = array(PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING);
+} catch (Exception $e) {
+    echo "Erreur de site web";
+    exit;
+}
+
+
+
+
 
 try {
     $pdo = new PDO($host, $login, $password, $options);

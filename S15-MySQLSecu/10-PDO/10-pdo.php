@@ -252,7 +252,7 @@ echo "Nombre de colonnes dans la requête : " . $stmt->columnCount();
 echo "<h2>05 - Requêtes de sélection pour plusieurs lignes de résultat avec fetchAll()</h2>";
 
 // fetch() permet de traiter une seule ligne à la fois ! 
-// fetchAll() traite toutes les lignes en une seule fois mais on obtient un résultat d'une forme un peu différente : 
+// fetchAll() traite toutes les lignes en une seule fois mais on obtient un résultat d'une forme un peu différente : array à deux niveaux
 
 $stmt = $pdo->query("SELECT * FROM employes");
 // fetchAll possède les mêmes modes que fetch(), ASSOC, OBJ etc

@@ -2,37 +2,10 @@
 
 /* 
 
-// Pour éviter les injections XSS (du code css ou js mis dans les commentaires ou les pseudo ou autre)
-// Il est possible d'utiliser des fonctions comme htmlspecialchars, htmlentities, strip_tags
-// Qui vont permettre de transformer les caractères problématique (les balises, les guillemets etc) en entités html
-// Elles seront bien affichées mais ne seront pas interprétées par le code ! 
-// par exemple un <hr> saisi sera réellement : &lt;hr&gt; 
+// Le même TP mais en SQLite
+// SQLite est un SGBD très léger qui n'a pas besoin de serveur, toutes les tables sont contenues dans des fichiers en local 
+// Comme tous SGBDR, la syntaxe reste très similaire ! 
 
-// Les injections XSS qui nous poseraient soucis, seraient par exemple :
-// En CSS : 
-<!-- // body display none :  <style>body{display:none;}</style> -->
-// Plus possible d'intéragir avec le site, il faut aller supprimer dans phpmyadmin ou avec la console, l'energistrement
-// En JS : 
-<!-- // une boucle infinie ! <script>while(true){alert("coucou");}</script> -->
-
-// Les injections SQL sont un concept de piratage qui nous permet d'insérer du code SQL directement dans un formulaire html ou une url 
-
-// On comprends que le système est sensible aux injections soit par divers messages d'erreurs lorsque l'on tape des messages avec des quote ou double quote, sinon on peut toujours tenter de lancer un DO SLEEP(10) pour voir s'il est interprété (cela rajoute un temps de délais avant de lancer une requete)
-
-// Quelques opérations pénibles via injection SQL
-// Des delete, des truncate, des drop table ou base !  
-
-// Si je veux faire une injection au travers de mon champ message, je dois faire en sorte de "cloturer" la requête prévue à l'origine, donc d'abord fermer le champs message avant de fermer le champ date_enregistrement
-// Par exemple :
-    // ', NOW()); DROP DATABASE dialogue;
-
-// En fonction des droits de l'utilisateur BDD actuellement connecté sur la page, je peux peut être avoir des droits plus étendus encore, par exemple les manipulations de fichier
-// Il est possible en MySQL de créer des fichiers dans le dossier tmp/temp de notre serveur, et ainsi y stocker le nom de la BDD récupérée via un SELECT DATABASE() (car par défaut on ne connait pas le nom de la base), le nom des tables de la base avec un SHOW TABLES()
-// Egalement, appeler des données d'autres tables (user, produit, commande, info CB ou autre), pour les insérer dans le fichier et les réinsérer dans la table qui m'est visible sur cette page, pour les récupérer et les vendre sur le dark web !!! :o 
-
-// Donc, il faut bien comprendre que lorsqu'une injection est possible sur notre site, alors l'intégralité du système et des données sont compromises !  
-
-// Bien sûr, il est maintenant très rare de faire face à des formulaires sensibles aux injections car c'est vraiment une protection BASIQUE, toujours mise en place sur nos form, que ce soit à la main, ou auto géré par des librairies et les framework
 
 EXERCICE :
 ----------------------
@@ -63,18 +36,24 @@ EXERCICE :
 
 */
 
-// - 02 - Créer une connexion à cette base avec PDO 
-$host = "mysql:host=localhost;dbname=dialogue";
-$login = "root";
-$password = "";
-$options = array(PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING);
+
 
 try {
-    $pdo = new PDO($host, $login, $password, $options);
+    $pdo = new PDO('sqlite:' . __DIR__ . '/dialogue.sqlite');
 } catch (PDOException $e) {
     echo "Erreur de BDD";
     exit;
 }
+
+// Création de la table si elle n'existe pas
+$createTableSQL = "
+CREATE TABLE IF NOT EXISTS commentaire (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    pseudo TEXT NOT NULL,
+    message TEXT NOT NULL,
+    date_enregistrement DATETIME DEFAULT CURRENT_TIMESTAMP
+)";
+$pdo->exec($createTableSQL);
 
 // var_dump($pdo);
 
@@ -112,7 +91,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["pseudo"], $_POST["mess
         // Je mets ici ma requête dans une variable pour l'afficher plus bas
         $req = "INSERT INTO commentaire (pseudo, message, date_enregistrement) VALUES ('$pseudo', '$message', NOW())";
         // $pdo->query($req);
-        $stmt = $pdo->prepare("INSERT INTO commentaire (pseudo, message, date_enregistrement) VALUES (:pseudo, :message, NOW())");
+        $stmt = $pdo->prepare("INSERT INTO commentaire (pseudo, message) VALUES (:pseudo, :message)");
         $stmt->bindParam(":pseudo", $pseudo, PDO::PARAM_STR);
         $stmt->bindParam(":message", $message, PDO::PARAM_STR);
         $stmt->execute();
@@ -123,7 +102,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["pseudo"], $_POST["mess
 }
 
 // - 06 - Requête de récupération des messages afin de les afficher dans cette page 
-$stmt = $pdo->query("SELECT id_commentaire, pseudo, message, DATE_FORMAT(date_enregistrement, '%d/%m/%Y à %T') AS date_fr FROM commentaire ORDER BY date_enregistrement DESC");
+$stmt = $pdo->query("SELECT id, pseudo, message, date_enregistrement FROM commentaire ORDER BY date_enregistrement DESC");
 // Ici avec fetchAll je récupère la totalité de mes messages en une seule var
 $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
 // Je compte le nombre d'éléments dans mon array récupéré avec fetchAll, c'est le nombre de message dans la base
@@ -212,7 +191,7 @@ $nbMessages = sizeof($messages);
                 <?php foreach ($messages as $message): ?>
                     <div class="card w-75 mx-auto mb-3">
                         <div class="card-header bg-dark text-white">
-                            Par : <?= htmlspecialchars($message["pseudo"]) ?>, le : <?= htmlspecialchars($message["date_fr"]) ?>
+                            Par : <?= htmlspecialchars($message["pseudo"]) ?>, le : <?= htmlspecialchars($message["date_enregistrement"]) ?>
                         </div>
                         <div class="card-body">
                             <p class="card-text"><?= htmlspecialchars($message["message"]) ?></p>
