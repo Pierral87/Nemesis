@@ -26,6 +26,7 @@ $errors = [];
 $success = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST["pseudo"], $_POST["email"], $_POST["password"], $_POST["password_confirm"])) {
+    
 
     $pseudo = trim($_POST['pseudo']);
     $email = trim($_POST['email']);
