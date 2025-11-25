@@ -14,3 +14,40 @@ Création d'une classe config pour la gérer la config d'une appli, cette classe
         une méthode static getAppName() pour récupérer la const 
 
 */
+
+class Config
+{
+      const APP_NAME = "myapp";
+
+      public static $settings = [
+            "debug" => true,
+            "urlRacine" => "https://google.com",
+            "login" => "martin.rlt@gmail.com",
+            "password" => "unmotdepassesupersécurisé",
+            "BDD" => "MariaDB"
+      ];
+
+      public static function setSettings($key, $value)
+      {
+            self::$settings[$key] = $value;
+      }
+
+      public static function getSettings($key)
+      {
+            if (array_key_exists($key, self::$settings)) {
+                  return self::$settings[$key];
+            } else {
+                  trigger_error("La clé doit exister", E_USER_NOTICE);
+            }
+      }
+
+      public static function getAppName()
+      {
+            return self::APP_NAME;
+      }
+}
+
+echo Config::getAppName();
+echo Config::setSettings("debug", false);
+echo var_dump(Config::getSettings("debug"));
+var_dump(Config::getSettings("z"));
