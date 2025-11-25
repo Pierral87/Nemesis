@@ -3,10 +3,16 @@
 /* 
 
 --------- 1 - Les constantes 
+    Les constantes dans une classe permettent de définir des valeurs immuables, c'est à dire qui ne peuvent pas être modifiées après 
+    On considère que les constantes sont des éléments static et donc appartiennent aux classes et non pas aux objet
+    Par défaut une constante est publique, mais il est possible de lui rajouter un niveau de visibilité 
 
 --------- 2 - Les props et méthodes static
+    Contrairement aux props et méthodes classiques, ici on considère que les éléments static appartiennent aux classes et donc ne sont pas conditionnés par l'existence d'un objet pour être utilisés 
+    Nouvelle syntaxe : NomDeClasse::$prop  
 
 --------- 3 - self 
+    Le mot clé self est utilisé pour accéder aux éléments static à l'intérieur de la classe (dans son scope local), c'est l'équivalent de $this, mais dans le contexte static
 
 */
 
@@ -29,7 +35,7 @@ class Panier
 }
 
 // J'instancie mon Panier mais je ne vois pas ma const TVA, ni ma prop static $totalProduits :(   
-$panier = new Panier();
+// $panier = new Panier();
 // var_dump($panier);
 
 // echo $panier->TVA; // Undefined property 
