@@ -89,7 +89,7 @@ $utilisateurB = new UserB;
 // Namespace GLobal : 
     // Lorsque je suis dans un namespace JE NE SUIS PLUS DANS LE SCOPE GLOBAL DE PHP 
     // Ce qui veut dire que je n'ai plus accès aux classes natives de PHP "basiquement", par exemple ci dessous un new Exception me retourne une erreur car il cherche une classe Exception dans le namespace MonProjet\Controller plutôt que Exception du scope global
-    // Le fait de rajouter un \ devant le nom \Exception me permet de retourner vers l'espace le temps de la ligne 
+    // Le fait de rajouter un \ devant le nom \Exception me permet de retourner vers l'espace global le temps de la ligne 
 class MonController {
     public function maMethode() {
         throw new \Exception;
