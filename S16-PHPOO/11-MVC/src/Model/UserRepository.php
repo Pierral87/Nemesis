@@ -40,4 +40,11 @@ class UserRepository
     public function modelSelectAll() {
         return $this->getDb()->query("SELECT * FROM user")->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function modelSelectOne($id) {
+        $stmt = $this->getDb()->prepare("SELECT * FROM user WHERE id_user = :id");
+        $stmt->bindParam(":id", $id, PDO::PARAM_STR);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }

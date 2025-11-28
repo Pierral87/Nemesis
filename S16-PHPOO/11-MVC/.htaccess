@@ -1,0 +1,8 @@
+RewriteEngine On 
+
+# On va faire en sorte de comprendre des pattern d'url pour les rediriger vers des url compréhensible pour notre serveur 
+
+# Cette première règle indique que s'il voit dans l'url un pattern étant chaineAlphaNumérique/chaineAlphaNumérique/chiffre cela correspond à une url de type ?ctrl=chaine1&op=chaine2&id=chiffre
+
+RewriteRule ^([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)/([0-9]+)$ index.php?ctrl=$1&op=$2&id=$3 [L,QSA]
+RewriteRule ^([a-zA-Z0-9_-]+)$ index.php?ctrl=$1 [L,QSA]
